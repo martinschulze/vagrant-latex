@@ -4,7 +4,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "ubuntu_1604"
+  config.vm.box = "geerlingguy/ubuntu1604"
 
   config.vm.define "latex" do |latex|
   end
@@ -13,7 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.customize ["modifyvm", :id, "--memory", "4096"]
     v.customize ["modifyvm", :id, "--vram", "128"]
 
-    v.name = "Latex2"
+    v.name = "Latex"
     v.customize ["modifyvm", :id, "--groups", "/Coding"]
     v.gui = true
   end
@@ -22,13 +22,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", inline: <<-SHELL
     mkdir -p /etc/puppet
     sudo touch /etc/puppet/hiera.yaml
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
     sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
     sudo apt-get dist-upgrade -y
-    sudo apt-get install -y xubuntu-desktop
+    echo -e "N\n" |sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xubuntu-desktop
     sudo apt-get install -f
     sudo apt-get install -y language-pack-de-base
     sudo apt-get install -y puppet
+    sudo puppet module install puppetlabs-stdlib
+    sudo puppet module install stm-debconf
   SHELL
 
   config.vm.provision :puppet do |puppet|
